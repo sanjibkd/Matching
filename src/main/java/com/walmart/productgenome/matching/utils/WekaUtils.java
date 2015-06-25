@@ -117,7 +117,7 @@ public class WekaUtils {
 			}
 			sb.append("\n");
 		}
-		System.out.println(sb.toString());
+		//System.out.println(sb.toString());
 		return new Instances(new StringReader(sb.toString()));
 	}
 	
@@ -237,13 +237,13 @@ public class WekaUtils {
 		Map<String, String> ruleStrings = new LinkedHashMap<String, String>();
 		for (String r : allRules) {
 			r = r.trim().replaceAll("\\s+", " ");
-			System.out.println("Rule before pattern matching: " + r);
+			//System.out.println("Rule before pattern matching: " + r);
 			String pattern = "IF (.+) THEN " + label + " (\\([\\d\\./]+\\))";
 			if (r.matches(pattern)) {
 				String ruleString = r.replaceAll(pattern, "$1");
-				System.out.println("Rule string: " + ruleString);
+				//System.out.println("Rule string: " + ruleString);
 				String ruleStats = r.replaceAll(pattern, "$2");
-				System.out.println("Rule stats: " + ruleStats);
+				//System.out.println("Rule stats: " + ruleStats);
 				if (ruleStrings.containsKey(ruleString)) {
 					ruleStats = getUpdatedRuleStats(ruleStats, ruleStrings.get(ruleString));
 				}

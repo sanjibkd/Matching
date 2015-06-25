@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import weka.classifiers.Classifier;
@@ -219,6 +220,33 @@ public class RuleService {
 			break;
 		case RF:
 			RandomForest model2 = new RandomForest();
+			Evaluation evaluation = new Evaluation(trainInstances);
+			long startTime = System.currentTimeMillis();
+			evaluation.crossValidateModel(model2, trainInstances, 10, new Random());
+			long endTime = System.currentTimeMillis();
+			System.out.println("Cross validation results");
+			System.out.println("************************");
+			System.out.println("Average accuracy: " + evaluation.pctCorrect());
+			System.out.println("Average precision (class index = 0): " + evaluation.precision(0));
+			System.out.println("Average recall (class index = 0): " + evaluation.recall(0));
+			System.out.println("Average precision (class index = 1): " + evaluation.precision(1));
+			System.out.println("Average recall (class index = 1): " + evaluation.recall(1));
+			System.out.println("True Positives: " + evaluation.numTruePositives(0));
+			System.out.println("False Positives: " + evaluation.numFalsePositives(0));
+			System.out.println("True Negatives: " + evaluation.numTrueNegatives(0));
+			System.out.println("False Negatives: " + evaluation.numFalseNegatives(0));
+			System.out.println("Confusion Matrix: ");
+			double[][] confusionMatrix = evaluation.confusionMatrix();
+			for (int i = 0; i < confusionMatrix.length; i++) {
+				for (int j = 0; j < confusionMatrix[i].length; j++) {
+					System.out.print(confusionMatrix[i][j] + " ");
+				}
+				System.out.println();
+			}
+			System.out.println("Total time taken (ms): " + (endTime - startTime));
+			System.out.println("Summary string: " + evaluation.toSummaryString());
+			
+			model2 = new RandomForest();
 			model2.buildClassifier(trainInstances);
 			System.out.println("Model: " + model2);
 			System.out.println("Rules\n--------");
@@ -397,4 +425,5 @@ public class RuleService {
 		project.deleteRule(rule);
 		ProjectDao.updateProject(project);
 	}
+	
 }

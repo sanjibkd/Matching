@@ -13,6 +13,9 @@ public class ConfusionMatrix {
 	private long falseNegatives;
 	private long falsePositives;
 	private long trueNegatives;
+	private long timeMillis;
+	private String modelInfo;
+	private String modelOptions;
 	
 	public long getTruePositives() {
 		return truePositives;
@@ -46,10 +49,37 @@ public class ConfusionMatrix {
 		this.trueNegatives = trueNegatives;
 	}
 	
+	public long getTimeMillis() {
+		return timeMillis;
+	}
+	
+	public void setTimeMillis(long timeMillis) {
+		this.timeMillis = timeMillis;
+	}
+	
+	public String getModelInfo() {
+		return modelInfo;
+	}
+	
+	public void setModelInfo(String modelInfo) {
+		this.modelInfo = modelInfo;
+	}
+	
+	public String getModelOptions() {
+		return modelOptions;
+	}
+	
+	public void setModelOptions(String modelOptions) {
+		this.modelOptions = modelOptions;
+	}
+	
 	@Override
 	public String toString() {
 		return "ConfusionMatrix [truePositives=" + truePositives
 				+ ", falseNegatives=" + falseNegatives + ", falsePositives="
-				+ falsePositives + ", trueNegatives=" + trueNegatives + "]";
+				+ falsePositives + ", trueNegatives=" + trueNegatives
+				+ ", time taken (ms): " + timeMillis
+				+ ", modelInfo: " + modelInfo
+				+ ", modelOptions: " + modelOptions +"]";
 	}
 }
