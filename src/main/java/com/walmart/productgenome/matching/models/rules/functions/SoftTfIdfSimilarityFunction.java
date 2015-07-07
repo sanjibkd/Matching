@@ -44,25 +44,15 @@ public class SoftTfIdfSimilarityFunction extends Function {
 			throw new IllegalArgumentException("Expected number of arguments " +
 					"for TF/IDF function is " + NUM_ARGS);
 		}
-		// TODO: Sanjib review.
-		if (args[0] == null || args[1] == null) {
-			return 0.0f;
-		}
-		if (args[0].toLowerCase().equals("null") || args[1].toLowerCase().equals("null")) {
-			return 0.0f;
-		}
-		if (args[0].isEmpty() || args[1].isEmpty()) {
-			return 0.0f;
-		}
-
-		String newArg0 = args[0].toLowerCase();
-		String newArg1 = args[1].toLowerCase();
-
-		newArg0 = newArg0.replaceAll("[^\\dA-Za-z ]", "");
-		newArg1 = newArg1.replaceAll("[^\\dA-Za-z ]", "");
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
 
 		SoftTFIDF metric = new SoftTFIDF();
-		return (float)metric.score(newArg0, newArg1);
+		return (float)metric.score(arg1, arg2);
 	}
 
 	@Override
@@ -82,5 +72,12 @@ public class SoftTfIdfSimilarityFunction extends Function {
 		sb.append(",");
 		sb.append(String.class.getName());
 		return sb.toString();
+	}
+	
+	public static void main(String[] args) {
+		String[] s = {"Casio Mens G-Shock Classic Digital Watch",
+				"Casio G7301B-3V G-Shock Classic Digital Sports Watch"};
+		Function stfidf = new SoftTfIdfSimilarityFunction();
+		System.out.println(stfidf.compute(s));
 	}
 }

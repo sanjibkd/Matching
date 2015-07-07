@@ -145,32 +145,26 @@ public class ExtractColorAndMatch extends Function {
 
 	@Override
 	public Float compute(String[] args) throws IllegalArgumentException{
-		if(args.length != NUM_ARGS){
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
 		}
-
-		if (args[0] == null || args[1] == null) {
-			return 0.0f;
-		}
-		if (args[0].toLowerCase().equals("null") || args[1].toLowerCase().equals("null")) {
-			return 0.0f;
-		}
-		if (args[0].isEmpty() || args[1].isEmpty()) {
-			return 0.0f;
-		}
-
-		String newArg0 = args[0].toLowerCase();
-		String newArg1 = args[1].toLowerCase();
+		
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
 
 		Set<String> colors0 = new HashSet<String>();
 		Set<String> colors1 = new HashSet<String>();
 		
 		for (String s: COLOR_DICTIONARY) {
-			if (newArg0.indexOf(" " + s.toLowerCase() + " ") != -1) {
+			if (arg1.indexOf(" " + s.toLowerCase() + " ") != -1) {
 				colors0.add(s);
 				//System.out.println("Adding " + s + " to colors0");
 			}
-			if (newArg1.indexOf(" " + s.toLowerCase() + " ") != -1) {
+			if (arg2.indexOf(" " + s.toLowerCase() + " ") != -1) {
 				colors1.add(s);
 				//System.out.println("Adding " + s + " to colors1");
 			}

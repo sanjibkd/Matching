@@ -24,28 +24,18 @@ public class OverlapSimilarityFunction extends Function {
 	
 	@Override
 	public Float compute(String[] args) throws IllegalArgumentException{
-		if(args.length != NUM_ARGS){
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
 		}
-	  // TODO: Sanjib review.
-    if (args[0] == null || args[1] == null) {
-      return 0.0f;
-    }
-    if (args[0].toLowerCase().equals("null") || args[1].toLowerCase().equals("null")) {
-      return 0.0f;
-    }
-    if (args[0].isEmpty() || args[1].isEmpty()) {
-      return 0.0f;
-    }
-    
-    String newArg0 = args[0].toLowerCase();
-    String newArg1 = args[1].toLowerCase();
-    
-    newArg0 = newArg0.replaceAll("[^\\dA-Za-z ]", "");
-    newArg1 = newArg1.replaceAll("[^\\dA-Za-z ]", "");
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
     
 		AbstractStringMetric metric = new OverlapCoefficient();
-		return metric.getSimilarity(newArg0, newArg1);
+		return metric.getSimilarity(arg1, arg2);
 	}
 
   @Override

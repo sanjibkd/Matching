@@ -38,19 +38,18 @@ public class AbsoluteDifference extends Function {
 					NUM_ARGS);
 		}
 		
-		// for missing values
-		if (args[0] == null || args[1] == null) {
-			return Float.NaN;
-		}
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
 		
-		Float res = null;
+		Float res = -1.0f;
 		try{
 			Float f1 = Float.parseFloat(args[0]);
 			Float f2 = Float.parseFloat(args[1]);
 			res = Math.abs(f1-f2);
 		}
 		catch(NumberFormatException nfe){
-			res = Float.NaN;
+			res = -1.0f;
 		}
 		return res;
 	}

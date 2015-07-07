@@ -22,22 +22,23 @@ public class ExactMatch extends Function {
 
 	@Override
 	public Object compute(String[] args) throws IllegalArgumentException {
-		if(args.length != NUM_ARGS){
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
 		}
-		Float res = null;
-		// TODO Sanjib: What is the default behavior when either of the arguments
-		// are null? I am assuming that we will return 0 similarity score.
-		if (args[0] == null || args[1] == null) {
-		  res = 0.0f;
-		}
-		else if(args[0].equals(args[1])) {
-			res = 1.0f;
+		
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
+		
+		if (arg1.equals(arg2)) {
+			return 1.0f;
 		}
 		else {
-			res = 0.0f;
+			return 0.0f;
 		}
-		return res;
 	}
 
   @Override

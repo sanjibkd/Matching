@@ -25,7 +25,7 @@ public class NormAbsDiff extends Function{
 	
 	@Override
 	public Float compute(String[] args) throws IllegalArgumentException {
-		if(args.length != 2){
+		if (args.length != 2) {
 			throw new IllegalArgumentException("Expected number of arguments: 2");
 		}
 		// for missing values

@@ -34,15 +34,14 @@ public class RelativeDifference extends Function {
 
 	@Override
 	public Object compute(String[] args) throws IllegalArgumentException {
-		if(args.length != NUM_ARGS){
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " +
 					NUM_ARGS);
 		}
 		
-		// for missing values
-		if (args[0] == null || args[1] == null) {
-			return Float.NaN;
-		}
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
 		
 		Float res = null;
 		try {
@@ -57,7 +56,7 @@ public class RelativeDifference extends Function {
 			
 		}
 		catch(NumberFormatException nfe) {
-			res = Float.NaN;
+			res = -1.0f;
 		}
 		return res;
 	}

@@ -24,12 +24,17 @@ public class ChapmanOrderedNameCompoundSimilarityFunction extends Function {
 	}
 	
 	@Override
-	public Float compute(String[] args) throws IllegalArgumentException{
-		if(args.length != NUM_ARGS){
+	public Float compute(String[] args) throws IllegalArgumentException {
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
 		}
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
 		AbstractStringMetric metric = new ChapmanOrderedNameCompoundSimilarity();
-		return metric.getSimilarity(args[0], args[1]);
+		return metric.getSimilarity(arg1, arg2);
 	}
 
   @Override

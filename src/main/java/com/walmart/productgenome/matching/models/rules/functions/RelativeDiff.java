@@ -25,13 +25,14 @@ public class RelativeDiff extends Function {
 	
 	@Override
 	public Float compute(String[] args) throws IllegalArgumentException {
-		if(args.length != 2){
+		if (args.length != 2) {
 			throw new IllegalArgumentException("Expected number of arguments: 2");
 		}
 		// TODO: Sanjib: review
-		if (args[0] == null || args[1] == null) {
-      return 0.0f;
-    }
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
 		Float res = null;
 		try{
 			Float f1 = Float.parseFloat(args[0]);
@@ -52,7 +53,7 @@ public class RelativeDiff extends Function {
 			res = Math.abs(f1-f2)/min;
 		}
 		catch(NumberFormatException nfe){
-			res = Float.NaN;
+			res = -1.0f;
 		}
 		return res;
 	}

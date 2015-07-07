@@ -25,11 +25,18 @@ public class JaroSimilarityFunction extends Function {
 	
 	@Override
 	public Float compute(String[] args) throws IllegalArgumentException{
-		if(args.length != NUM_ARGS){
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
 		}
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
+		
 		AbstractStringMetric metric = new Jaro();
-		return metric.getSimilarity(args[0], args[1]);
+		return metric.getSimilarity(arg1, arg2);
 	}
 
   @Override

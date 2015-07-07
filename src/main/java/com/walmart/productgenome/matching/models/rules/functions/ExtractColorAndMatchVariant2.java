@@ -5,9 +5,9 @@ import java.util.Set;
 
 import com.walmart.productgenome.matching.models.data.Attribute.AllTypes;
 
-public class ExtractColorAndMatchVariant extends Function {
+public class ExtractColorAndMatchVariant2 extends Function {
 
-	public static final String NAME = "EXTRACT_COLOR_AND_MATCH_VARIANT";
+	public static final String NAME = "EXTRACT_COLOR_AND_MATCH_VARIANT2";
 	public static final String DESCRIPTION = "Searches for color keywords from a"
 			+ " pre-specified dictionary in the specified attributes and generates"
 			+ " a set of colors for each tuple. Then"
@@ -135,27 +135,23 @@ public class ExtractColorAndMatchVariant extends Function {
 		"Yellow",
 		"Zebra Eye"};
 	
-	public ExtractColorAndMatchVariant() {
+	public ExtractColorAndMatchVariant2() {
 		super(NAME, DESCRIPTION);
 	}
 
-	public ExtractColorAndMatchVariant(String name, String description){
+	public ExtractColorAndMatchVariant2(String name, String description){
 		super(name, description);
 	}
 
 	@Override
 	public Float compute(String[] args) throws IllegalArgumentException{
-		if(args.length != NUM_ARGS){
-			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
-		}
-
 		float simValue = handleMissingValue(args[0], args[1]);
 		if (simValue != 0.0f)
 			return simValue;
 		
 		String arg1 = args[0].toLowerCase();
 		String arg2 = args[1].toLowerCase();
-
+		
 		Set<String> colors0 = new HashSet<String>();
 		Set<String> colors1 = new HashSet<String>();
 		
@@ -206,7 +202,7 @@ public class ExtractColorAndMatchVariant extends Function {
 	}
 
 	public static void main(String[] args){
-		Function ecm = new ExtractColorAndMatchVariant();
+		Function ecm = new ExtractColorAndMatchVariant2();
 		String s1 = "[\"This rooCASE sleeve features super shock absorbing "
 				+ "interior provide protection from bumps and scratches. Made "
 				+ "specifically for iPad Generations 2, 3 & 4 Product Material: "

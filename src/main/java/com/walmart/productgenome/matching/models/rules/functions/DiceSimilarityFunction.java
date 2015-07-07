@@ -7,6 +7,7 @@ import com.walmart.productgenome.matching.models.data.Attribute.AllTypes;
 import com.walmart.productgenome.matching.models.rules.functions.Function.ArgType;
 
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
+import uk.ac.shef.wit.simmetrics.similaritymetrics.CosineSimilarity;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.DiceSimilarity;
 
 public class DiceSimilarityFunction extends Function {
@@ -24,12 +25,20 @@ public class DiceSimilarityFunction extends Function {
 	}
 	
 	@Override
-	public Float compute(String[] args) throws IllegalArgumentException{
-		if(args.length != NUM_ARGS){
+	public Float compute(String[] args) throws IllegalArgumentException {
+		if (args.length != NUM_ARGS) {
 			throw new IllegalArgumentException("Expected number of arguments: " + NUM_ARGS);
 		}
+		
+		float simValue = handleMissingValue(args[0], args[1]);
+		if (simValue != 0.0f)
+			return simValue;
+		
+		String arg1 = args[0].toLowerCase();
+		String arg2 = args[1].toLowerCase();
+		
 		AbstractStringMetric metric = new DiceSimilarity();
-		return metric.getSimilarity(args[0], args[1]);
+		return metric.getSimilarity(arg1, arg2);
 	}
 
   @Override
