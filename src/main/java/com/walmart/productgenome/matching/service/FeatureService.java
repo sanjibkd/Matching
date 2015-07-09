@@ -39,7 +39,7 @@ public class FeatureService {
 		}
 		Table featureVectors = new Table(featureTableName, idAttribute,
 				attributes, projectName);
-		
+
 		Attribute id1 = pairsAttributes.get(1);
 		Attribute id2 = pairsAttributes.get(2); 
 		for (Tuple pair : pairsTable.getAllTuplesInOrder()) {
@@ -60,7 +60,7 @@ public class FeatureService {
 		}
 		return featureVectors;
 	}
-	
+
 	private static int getAverageWordCount(Table table, Attribute attribute) {
 		// do one pass of table to count the number of words
 		long numWords = 0;
@@ -83,7 +83,7 @@ public class FeatureService {
 				numNonEmptyVals);
 		return Math.round(numWords/numNonEmptyVals);
 	}
-	
+
 	private static AllTypes getStringType(Table table1, Table table2,
 			Attribute attribute1, Attribute attribute2) {
 		int avg1 = getAverageWordCount(table1, attribute1);
@@ -106,7 +106,7 @@ public class FeatureService {
 			return AllTypes.MULTI_WORD_LONG_STRING;
 		}
 	}
-	
+
 	public static List<Feature> recommendFeatures(Project project, Table table1,
 			Table table2, List<AttributePair> attributePairs) {
 		List<Feature> recommendedFeatures = new ArrayList<Feature>();
@@ -149,7 +149,7 @@ public class FeatureService {
 		}
 		return recommendedFeatures;
 	}
-	
+
 	public static void addFeatures(Project project, List<Feature> features,
 			boolean saveToDisk) throws IOException {
 		for(Feature feature : features) {
@@ -160,14 +160,14 @@ public class FeatureService {
 				FeatureSaver.addFeature(project.getName(), feature);
 			}
 			else {
-			// put this feature in the unsavedFeatures
+				// put this feature in the unsavedFeatures
 				project.addUnsavedFeature(feature.getName());
 			}
 		}
 		// update project
 		ProjectDao.updateProject(project);
 	}
-	
+
 	public static void editFeatureUsingGui(Project project, String featureName,
 			String functionName, String table1Name, String attribute1Name,
 			String table2Name, String attribute2Name, boolean saveToDisk) throws IOException {
@@ -191,35 +191,35 @@ public class FeatureService {
 			throw new IllegalArgumentException("Cannot find table " +
 					table2Name + " in project " + projectName);
 		}
-		
+
 		Table table1 = TableDao.open(projectName, table1Name);
 		if (null == table1) {
 			throw new IllegalArgumentException("Cannot open table " +
 					table1Name + " in project " + projectName);
 		}
-		
+
 		Table table2 = TableDao.open(projectName, table2Name);
 		if (null == table2) {
 			throw new IllegalArgumentException("Cannot open table " +
 					table2Name + " in project " + projectName);
 		}
-		
+
 		Attribute attribute1 = table1.getAttributeByName(attribute1Name);
 		if (null == attribute1) {
 			throw new IllegalArgumentException("Cannot find attribute " +
 					attribute1Name + " in table " + table1Name);
 		}
-		
+
 		Attribute attribute2 = table2.getAttributeByName(attribute2Name);
 		if (null == attribute2) {
 			throw new IllegalArgumentException("Cannot find attribute " +
 					attribute2Name + " in table " + table2Name);
 		}
-		
+
 		feature.setFunction(function);
 		feature.setAttribute1(attribute1);
 		feature.setAttribute2(attribute2);
-		
+
 		if (saveToDisk) {
 			// save the feature in all.features file
 			FeatureSaver.saveFeature(projectName, feature, project);
@@ -233,16 +233,78 @@ public class FeatureService {
 		// update project
 		ProjectDao.updateProject(project);
 	}
-	
+
 	public static void deleteFeature(String projectName, String featureName)
 			throws IOException {
 		Project project = ProjectDao.open(projectName);
 		Feature feature = project.findFeatureByName(featureName);
 		FeatureSaver.deleteFeature(projectName, feature, project);
-			
+
 		// update project
 		project.removeUnsavedFeature(featureName);
 		project.deleteFeature(feature);
 		ProjectDao.updateProject(project);
+	}
+
+	public static Map<String, FeatureStatistics> computeFeatureCosts(String
+			projectName, Table pairsTable, Table table1, Table table2, List<Feature> features) {
+		List<Attribute> pairsAttributes = pairsTable.getAttributes();
+		Attribute id1 = pairsAttributes.get(1);
+		Attribute id2 = pairsAttributes.get(2);
+		Map<String, FeatureStatistics> featureStatsMap = new HashMap<String, FeatureStatistics>();
+		System.out.println("No. of tuple pairs: " + pairsTable.getSize());
+		for (Feature f: features) {
+			String featureName = f.getName();
+			long count0 = 0, count1 = 0, countNull = 0;
+			long[] bucketCounts = {0, 0, 0, 0, 0}; // (0-0.2], (0.2-0.4], ..., (0.8,1)
+			long avgFeatureCostPerTuple = 0;
+			long avgFeatureCostPerTupleExcludingNull = 0;
+			for (Tuple pair : pairsTable.getAllTuples()) {
+				Object id1Val = pair.getAttributeValue(id1);
+				Object id2Val = pair.getAttributeValue(id2);
+				Tuple tuple1 = table1.getTuple(id1Val);
+				Tuple tuple2 = table2.getTuple(id2Val);
+				long startTime = System.nanoTime();
+				float featureVal = f.compute(tuple1, tuple2);
+				long elapsedTime = System.nanoTime() - startTime;
+				if (featureVal == -1.0) {
+					countNull++;
+				}
+				else {
+					if (featureVal == 0) {
+						count0++;
+					}
+					else if (featureVal <= 0.2) {
+						bucketCounts[0]++;
+					}
+					else if (featureVal <= 0.4) {
+						bucketCounts[1]++;
+					}
+					else if (featureVal <= 0.6) {
+						bucketCounts[2]++;
+					}
+					else if (featureVal <= 0.8) {
+						bucketCounts[3]++;
+					}
+					else if (featureVal < 1) {
+						bucketCounts[4]++;
+					}
+					else {
+						count1++;
+					}
+					avgFeatureCostPerTupleExcludingNull += elapsedTime;
+				}
+				avgFeatureCostPerTuple += elapsedTime;
+			}
+			System.out.println("Feature Name: " + featureName + ", countNull: " + countNull);
+			avgFeatureCostPerTuple /= pairsTable.getSize();
+			if (pairsTable.getSize() != countNull)
+				avgFeatureCostPerTupleExcludingNull /= (pairsTable.getSize() - countNull);
+			FeatureStatistics featureStats = new FeatureStatistics(count0,
+					count1, countNull, bucketCounts, avgFeatureCostPerTuple,
+					avgFeatureCostPerTupleExcludingNull);
+			featureStatsMap.put(featureName, featureStats);
+		}
+		return featureStatsMap;
 	}
 }
