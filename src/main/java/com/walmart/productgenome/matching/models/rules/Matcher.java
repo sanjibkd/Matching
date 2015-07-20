@@ -99,6 +99,41 @@ public class Matcher {
 		return result;
 	}
 
+	public MatchStatus evaluate(Tuple featureTuple, ItemPairAudit itemPairAudit) throws IOException {
+
+		// This evaluates all rules for tuple because it want to have complete
+		// audit info. It does not break at the rule that matched the item pair.
+
+		List<RuleAudit> ruleAudits = new ArrayList<RuleAudit>();
+		List<String> matchingRuleNames = new ArrayList<String>();
+
+		MatchStatus result = MatchStatus.NON_MATCH;
+
+		for (Rule r : rules) {
+			RuleAudit ruleAudit = new RuleAudit(r);
+
+			//System.out.println("Evaluating rule " + r.getName());
+
+			MatchStatus rtmp = r.evaluate(featureTuple, ruleAudit);
+			ruleAudit.setStatus(rtmp);
+
+			if(rtmp == MatchStatus.MATCH) {
+				matchingRuleNames.add(r.getName());
+				result = MatchStatus.MATCH;
+			}
+			else if(rtmp != MatchStatus.NON_MATCH && result != MatchStatus.MATCH){
+				result = rtmp;
+			}
+
+			ruleAudits.add(ruleAudit);
+		}
+
+		itemPairAudit.setMatchingRuleNames(matchingRuleNames);
+		itemPairAudit.setRuleAuditValues(ruleAudits);
+
+		return result;
+	}
+	
 	public int getNumRules(){
 		return rules.size();
 	}

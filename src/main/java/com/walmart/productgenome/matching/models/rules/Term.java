@@ -28,14 +28,14 @@ public class Term {
 		this.relop = relop;
 		this.feature2 = feature2;
 	}
-	
+
 	public Feature getFeature1() {
-	  return feature1;
+		return feature1;
 	}
-	
+
 	public Feature getFeature2() {
-    return feature2;
-  }
+		return feature2;
+	}
 
 	public RelationalOperator getRelop() {
 		return relop;
@@ -85,7 +85,7 @@ public class Term {
 			return MatchStatus.NON_MATCH;
 		}
 	}
-	
+
 	public MatchStatus evaluate(Tuple featureVectorTuple) throws IOException {
 		float lvalue = (Float) featureVectorTuple.getAttributeValue(new Attribute(feature1.getName(), Type.FLOAT));
 		float rvalue = value;
@@ -126,15 +126,23 @@ public class Term {
 			return MatchStatus.NON_MATCH;
 		}
 	}
-	
+
 	public MatchStatus evaluate(Tuple tuple1, Tuple tuple2, TermAudit termAudit) throws IOException {
-	  // This is a more detailed evaluation for collecting TermAudit
-	  float lvalue = feature1.compute(tuple1,tuple2);
-	  termAudit.setCalculatedScore(lvalue);
-	  
-	  return evaluate(tuple1, tuple2);
-  }
-		
+		// This is a more detailed evaluation for collecting TermAudit
+		float lvalue = feature1.compute(tuple1,tuple2);
+		termAudit.setCalculatedScore(lvalue);
+
+		return evaluate(tuple1, tuple2);
+	}
+
+	public MatchStatus evaluate(Tuple featureTuple, TermAudit termAudit) throws IOException {
+		// This is a more detailed evaluation for collecting TermAudit
+		float lvalue = (Float) featureTuple.getAttributeValue(new Attribute(feature1.getName(), Type.FLOAT));
+		termAudit.setCalculatedScore(lvalue);
+
+		return evaluate(featureTuple);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -150,7 +158,7 @@ public class Term {
 		}
 		return sb.toString();
 	}
-  
+
 	public String getTermString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(feature1.getName());
@@ -165,7 +173,7 @@ public class Term {
 		}
 		return sb.toString();
 	}
-	
+
 	public String getDisplayString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(feature1.getName());

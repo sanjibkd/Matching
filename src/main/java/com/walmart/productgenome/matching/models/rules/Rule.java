@@ -79,6 +79,36 @@ public class Rule {
 	  return result;
   }
 	
+	public MatchStatus evaluate(Tuple featureTuple, RuleAudit ruleAudit) throws IOException {
+		
+		  // This evaluates all terms for tuple because it wants to have
+		  // complete audit info. It does not break at the term that did not apply
+		  // to the item pair.
+		  
+		  MatchStatus result = MatchStatus.MATCH;
+		  List<TermAudit> termAudits = new ArrayList<TermAudit>();
+		  
+		  for (Term t : terms){
+		    TermAudit termAudit = new TermAudit(t);
+		    //System.out.println("Evaluating term " + t);
+		    MatchStatus rtmp = t.evaluate(featureTuple, termAudit);
+		    termAudit.setStatus(rtmp);
+		    if(rtmp == MatchStatus.NON_MATCH) {
+		    	result = rtmp;
+		    }
+		    else if(rtmp != MatchStatus.MATCH && result == MatchStatus.MATCH) {
+		    	// DECLINE_TO_PREDICT or UNSURE
+		    	// do not override NON_MATCH
+		    	result = rtmp;
+		    }
+	      termAudits.add(termAudit);
+	    }
+		  
+		  ruleAudit.setTermAuditValues(termAudits);
+		  
+		  return result;
+	  }
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

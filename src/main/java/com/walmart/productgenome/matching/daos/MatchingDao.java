@@ -110,6 +110,19 @@ public class MatchingDao {
 				matchesName, itemPairAudits, table1AttributeNames, table2AttributeNames);
 	}
 
+	// MatchWithAudit
+		public static Table match(String projectName, Table pairsTable,
+				Table featuresTable, Table table1, Table table2,
+				String matcherName, String matchesName, 
+				Map<Tuple, ItemPairAudit> itemPairAudits,
+				String[] table1AttributeNames, String[] table2AttributeNames) throws IOException {
+			Project project = ProjectDao.open(projectName);
+			Matcher matcher = project.findMatcherByName(matcherName);
+			return getMatches(projectName, pairsTable, featuresTable, table1,
+					table2, matcher, matchesName, itemPairAudits,
+					table1AttributeNames, table2AttributeNames);
+		}
+		
 	public static void addMatchingSummary(String projectName,
 			MatchingSummary matchingSummary) throws IOException {
 		Project project = ProjectDao.open(projectName);
@@ -170,6 +183,7 @@ public class MatchingDao {
 		Table matches = new Table(matchesName, pairIdAttribute, matchesAttributes, projectName);
 		return matches;
 	}
+	
 	private static Table getMatches(String projectName, Table candset, Table table1,
 			Table table2, Matcher matcher, String matchesName,
 			String[] table1AttributeNames, String[] table2AttributeNames) throws IOException {
@@ -212,6 +226,31 @@ public class MatchingDao {
 		return matches;
 	}
 	
+	private static Table getMatches(String projectName, Table pairsTable,
+			Table featuresTable, Table table1, Table table2,
+			Matcher matcher, String matchesName, 
+			Map<Tuple, ItemPairAudit> itemPairAudits,
+			String[] table1AttributeNames, String[] table2AttributeNames) throws IOException {
+
+		List<Attribute> matchesAttributes = new ArrayList<Attribute>();
+		List<Attribute> table1Attributes = new ArrayList<Attribute>();
+		List<Attribute> table2Attributes = new ArrayList<Attribute>();
+
+		Table matches = createMatchesTable(projectName, pairsTable,
+				table1, table2, matchesName, matchesAttributes, table1AttributeNames,
+				table2AttributeNames,
+				table1Attributes, table2Attributes);
+
+
+		List<Tuple> matchedPairs = getMatchedPairs(pairsTable, featuresTable,
+				table1, table2,
+				matcher, matchesAttributes, table1Attributes, table2Attributes, itemPairAudits);
+
+		//System.out.println("No. of matched pairs: " + matchedPairs.size());
+		matches.addAllTuples(matchedPairs);
+		return matches;
+	}
+	
 	private static List<Tuple> getMatchedPairs(Table candset, Table table1,
 			Table table2, Matcher matcher, List<Attribute> matchesAttributes,
 			List<Attribute> table1Attributes, List<Attribute> table2Attributes) throws IOException {
@@ -231,6 +270,24 @@ public class MatchingDao {
 		for (Tuple t : candset.getAllTuplesInOrder()) {
 			ItemPairAudit itemPairAudit = new ItemPairAudit(t);
 			MatchStatus result = addMatchedPair(t, table1, table2, matcher,
+					matchesAttributes,
+					matchedPairs, table1Attributes, table2Attributes, itemPairAudit);
+			
+			itemPairAudit.setStatus(result);
+			itemPairAudits.put(t, itemPairAudit);
+		}
+		return matchedPairs;
+	}
+	
+	private static List<Tuple> getMatchedPairs(Table pairsTable, 
+			Table featuresTable, Table table1,
+			Table table2, Matcher matcher, List<Attribute> matchesAttributes,
+			List<Attribute> table1Attributes, List<Attribute> table2Attributes,
+			Map<Tuple, ItemPairAudit> itemPairAudits) throws IOException {
+		List<Tuple> matchedPairs = new ArrayList<Tuple>();
+		for (Tuple t : pairsTable.getAllTuplesInOrder()) {
+			ItemPairAudit itemPairAudit = new ItemPairAudit(t);
+			MatchStatus result = addMatchedPair(t, featuresTable, table1, table2, matcher,
 					matchesAttributes,
 					matchedPairs, table1Attributes, table2Attributes, itemPairAudit);
 			
@@ -336,4 +393,42 @@ public class MatchingDao {
 		return result;
 	}
 	
+	private static MatchStatus addMatchedPair(Tuple candsetTuple,
+			Table featuresTable, Table table1,
+			Table table2, Matcher matcher, List<Attribute> matchesAttributes,
+			List<Tuple> matchedPairs, List<Attribute> table1Attributes,
+			List<Attribute> table2Attributes, ItemPairAudit itemPairAudit) throws IOException {
+		
+		Attribute pairIdAttribute = matchesAttributes.get(0);
+		Attribute idAttribute1 = matchesAttributes.get(1);
+		Attribute idAttribute2 = matchesAttributes.get(2);
+		Object pairId = candsetTuple.getAttributeValue(pairIdAttribute);
+		Object id1 = candsetTuple.getAttributeValue(idAttribute1);
+		Object id2 = candsetTuple.getAttributeValue(idAttribute2);
+		
+		Tuple tuple1 = table1.getTuple(id1);
+		if (null == tuple1) {
+			throw new IOException("Cannot retrieve tuple from table 1. Tuple id: " + id1);
+		}
+		
+		Tuple tuple2 = table2.getTuple(id2);
+		if (null == tuple2) {
+			throw new IOException("Cannot retrieve tuple from table 2. Tuple id: " + id2);
+		}
+		
+		Map<Attribute, Object> data = getMatchedPairData(matchesAttributes,
+				candsetTuple, tuple1, tuple2, matcher, table1Attributes, table2Attributes);
+		
+		data.put(idAttribute1, id1);
+		data.put(idAttribute2, id2);
+		
+		Tuple featureTuple = featuresTable.getTuple(pairId);
+		//System.out.println("[MatchingDao] Evaluating tuple1: " + tuple1 + ", tuple2: " + tuple2);
+		MatchStatus result = matcher.evaluate(featureTuple, itemPairAudit);
+		Attribute labelAttribute = matchesAttributes.get(matchesAttributes.size()-1);
+		data.put(labelAttribute, result.getLabel());
+		matchedPairs.add(new Tuple(data));
+		//System.out.println("MatchingDao (pairId, MatchStatus): (" + pairId + ", " + result + ")");
+		return result;
+	}
 }
