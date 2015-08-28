@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import weka.classifiers.lazy.LBR.Indexes;
-
 import com.walmart.productgenome.matching.models.data.Attribute;
 import com.walmart.productgenome.matching.models.data.Table;
 import com.walmart.productgenome.matching.models.data.Tuple;

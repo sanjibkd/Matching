@@ -10,7 +10,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.OverlapCoefficient;
 
 public class OverlapSimilarityFunction extends Function {
 	
-	public static final String NAME = "OVERLAP_SIMILARITY";
+	public static final String NAME = "OVERLAP";
 	public static final String DESCRIPTION = "Overlap similarity";
 	public static final int NUM_ARGS = 2;
 	

@@ -107,6 +107,29 @@ public class FeatureService {
 		}
 	}
 
+	private static String getInitials(String s) {
+		String[] v = s.split("_");
+		if (v.length == 1) {
+			return s;
+		}
+		String initials = "";
+		for (int i = 0; i < v.length; i++) {
+			initials += v[i].charAt(0);
+		}
+		return initials;
+	}
+	
+	private static String getFeatureName(
+			String  attribute1Name, String attribute2Name, String functionName) {
+		String i1 = getInitials(attribute1Name);
+		String i2 = getInitials(attribute2Name);
+		String featureName = i1;
+		if (!i1.equals(i2)) {
+			featureName += "_" + i2;
+		}
+		featureName += "_" + functionName;
+		return featureName;
+	}
 	public static List<Feature> recommendFeatures(Project project, Table table1,
 			Table table2, List<AttributePair> attributePairs) {
 		List<Feature> recommendedFeatures = new ArrayList<Feature>();
@@ -139,9 +162,13 @@ public class FeatureService {
 			recommendedFunctions = FunctionService.getRecommendedFunctions(project,
 					type);
 			for (Function function : recommendedFunctions) {
+				/*
 				String featureName = table1.getName() + "_" + table2.getName() +
 						"_" + attribute1.getName() + "_" +
 						attribute2.getName() + "_" + function.getName();
+				*/
+				String featureName = getFeatureName(attribute1.getName(),
+						attribute2.getName(), function.getName());
 				Feature feature = new Feature(featureName, function,
 						project.getName(), attribute1, attribute2);
 				recommendedFeatures.add(feature);

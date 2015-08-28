@@ -220,6 +220,7 @@ public class RuleService {
 			break;
 		case RF:
 			RandomForest model2 = new RandomForest();
+			model2.setNumExecutionSlots(8);
 			Evaluation evaluation = new Evaluation(trainInstances);
 			long startTime = System.currentTimeMillis();
 			evaluation.crossValidateModel(model2, trainInstances, 10, new Random());
@@ -247,6 +248,7 @@ public class RuleService {
 			System.out.println("Summary string: " + evaluation.toSummaryString());
 			
 			model2 = new RandomForest();
+			model2.setNumExecutionSlots(8);
 			model2.buildClassifier(trainInstances);
 			System.out.println("Model: " + model2);
 			System.out.println("Rules\n--------");
@@ -340,6 +342,7 @@ public class RuleService {
 		Instances instances = WekaUtils.getInstancesFromTable(seedFeatureVectors, true, false);
 		Instances trainInstances = WekaUtils.applyFilterToInstances(instances);
 		RandomForest model = new RandomForest();
+		model.setNumExecutionSlots(8);
 		model.buildClassifier(trainInstances);
 		System.out.println("Model: " + model);
 		System.out.println("Rules\n--------");

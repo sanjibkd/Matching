@@ -28,7 +28,7 @@ public class RelativeDifference extends Function {
 	@Override
 	public Set<AllTypes> getAllRecommendedTypes() {
 		Set<AllTypes> recommendedTypes = new HashSet<AllTypes>();
-		recommendedTypes.add(AllTypes.NUMERIC);
+		recommendedTypes.add(AllTypes.SINGLE_WORD_STRING);
 		return recommendedTypes;
 	}
 

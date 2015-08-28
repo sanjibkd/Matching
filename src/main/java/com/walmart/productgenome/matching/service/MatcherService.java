@@ -149,6 +149,28 @@ public class MatcherService {
 		return cm;
 	}
 	
+	private static ConfusionMatrix evaluateModel(AbstractClassifier classifier,
+			Instances trainInstances, Instances testInstances) throws Exception {
+		long startTime = System.currentTimeMillis();
+		classifier.buildClassifier(trainInstances);
+		Evaluation eval = new Evaluation(trainInstances);
+		eval.evaluateModel(classifier, testInstances);
+		long trainTestTime = System.currentTimeMillis() - startTime;
+		ConfusionMatrix cm = new ConfusionMatrix();
+		cm.setTruePositives((long)eval.numTruePositives(0));
+		cm.setFalseNegatives((long)eval.numFalseNegatives(0));
+		cm.setTrueNegatives((long)eval.numTrueNegatives(0));
+		cm.setFalsePositives((long)eval.numFalsePositives(0));
+		cm.setTimeMillis(trainTestTime);
+		StringBuilder sb = new StringBuilder();
+		for (String s: classifier.getOptions()) {
+			sb.append(s);
+			sb.append("\n");
+		}
+		cm.setModelOptions(sb.toString());
+		return cm;
+	}
+	
  	public static Map<String, ConfusionMatrix> evaluateModelsUsingCV(Table trainFeaturesTable,
 			String[] modelNames, int numFolds) throws Exception {
 		Instances instances = WekaUtils.getInstancesFromTable(trainFeaturesTable, true, false);
@@ -159,6 +181,7 @@ public class MatcherService {
 		for (String s: modelNames) {
 			if	("RF".equals(s)) {
 				RandomForest rf = new RandomForest();
+				rf.setNumExecutionSlots(8);
 				ConfusionMatrix cm = evaluateModel(rf, trainInstances, numFolds);
 				cm.setModelInfo(rf.globalInfo());
 				modelEvaluations.put("Random Forest", cm);
@@ -225,8 +248,84 @@ public class MatcherService {
 		return modelEvaluations;
 	}
 	
-	public static Map<String, ConfusionMatrix> evaluateModelsUsingTrainTestFeaturesData(Table trainFeaturesTable,
-			Table testFeaturesTable, String[] modelNames) {
-		return new HashMap<String, ConfusionMatrix>();
+	public static Map<String, ConfusionMatrix> evaluateModelsUsingTrainTest(Table trainFeaturesTable,
+			Table testFeaturesTable, String[] modelNames) throws Exception {
+		Instances instances1 = WekaUtils.getInstancesFromTable(trainFeaturesTable, true, false);
+		Instances trainInstances = WekaUtils.applyFilterToInstances(instances1);
+		trainInstances = WekaUtils.setClassIndex(trainInstances);
+		
+		Instances instances2 = WekaUtils.getInstancesFromTable(testFeaturesTable, true, false);
+		Instances testInstances = WekaUtils.applyFilterToInstances(instances2);
+		testInstances = WekaUtils.setClassIndex(testInstances);
+		
+		Map<String, ConfusionMatrix> modelEvaluations = new HashMap<String, ConfusionMatrix>();
+		for (String s: modelNames) {
+			if	("RF".equals(s)) {
+				RandomForest rf = new RandomForest();
+				rf.setNumExecutionSlots(8);
+				ConfusionMatrix cm = evaluateModel(rf, trainInstances, testInstances);
+				cm.setModelInfo(rf.globalInfo());
+				modelEvaluations.put("Random Forest", cm);
+			}
+			else if ("J48".equals(s)) {
+				J48 j48 = new J48();
+				ConfusionMatrix cm = evaluateModel(j48, trainInstances, testInstances);
+				cm.setModelInfo(j48.globalInfo());
+				modelEvaluations.put("Decision Tree", cm);
+			}
+			else if ("SMO".equals(s)) {
+				SMO smo = new SMO();
+				ConfusionMatrix cm = evaluateModel(smo, trainInstances, testInstances);
+				cm.setModelInfo(smo.globalInfo());
+				modelEvaluations.put("Support Vector Machine", cm);
+			}
+			else if ("NB".equals(s)) {
+				NaiveBayes nb = new NaiveBayes();
+				ConfusionMatrix cm = evaluateModel(nb, trainInstances, testInstances);
+				cm.setModelInfo(nb.globalInfo());
+				modelEvaluations.put("Naive Bayes", cm);
+			}
+			else if ("IBK".equals(s)) {
+				IBk ibk = new IBk();
+				ConfusionMatrix cm = evaluateModel(ibk, trainInstances, testInstances);
+				cm.setModelInfo(ibk.globalInfo());
+				modelEvaluations.put("K-Nearest Neighbors", cm);
+			}
+			else if ("ABM1".equals(s)) {
+				AdaBoostM1 abm1 = new AdaBoostM1();
+				ConfusionMatrix cm = evaluateModel(abm1, trainInstances, testInstances);
+				cm.setModelInfo(abm1.globalInfo());
+				modelEvaluations.put("Adaptive Boosting (AdaBoostM1)", cm);
+			}
+			else if ("STACKING".equals(s)) {
+				Stacking stacking = new Stacking();
+				stacking.setMetaClassifier(new Logistic());
+				Classifier[] baseClassifiers = new Classifier[2];
+				baseClassifiers[0] = new J48();
+				baseClassifiers[1] = new IBk();
+				stacking.setClassifiers(baseClassifiers);
+				ConfusionMatrix cm = evaluateModel(stacking, trainInstances, testInstances);
+				cm.setModelInfo(stacking.globalInfo());
+				modelEvaluations.put("Stacking", cm);
+			}
+			else if ("LB".equals(s)) {
+				LogitBoost lb = new LogitBoost();
+				ConfusionMatrix cm = evaluateModel(lb, trainInstances, testInstances);
+				cm.setModelInfo(lb.globalInfo());
+				modelEvaluations.put("Additive Logistic Regression", cm);
+			}
+			else if ("GBRT".equals(s)) {
+				LogitBoost lb = new LogitBoost();
+				REPTree rep = new REPTree();
+				rep.setMaxDepth(6);
+				lb.setClassifier(rep);
+				lb.setNumIterations(50);
+				lb.setShrinkage(0.1);
+				ConfusionMatrix cm = evaluateModel(lb, trainInstances, testInstances);
+				cm.setModelInfo(lb.globalInfo());
+				modelEvaluations.put("Gradient Boosting Trees", cm);
+			}
+		}
+		return modelEvaluations;
 	}
 }

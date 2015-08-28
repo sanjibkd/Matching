@@ -11,7 +11,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.NeedlemanWunch;
 
 public class NeedlemanWunchSimilarityFunction extends Function {
 	
-	public static final String NAME = "NEEDLEMAN_WUNCH_SIMILARITY";
+	public static final String NAME = "NEEDLEMAN_WUNCH";
 	public static final String DESCRIPTION = "The Needleman-Wunch similarity " +
 			"function generalizes the Levenshtein similarity function. " +
 			"Specifically it is computed by assigning a score to each alignment " +

@@ -14,52 +14,51 @@ public class ExtractColorAndMatch extends Function {
 			+ "computes a Jaccard score on the two sets of colors";
 	public static final int NUM_ARGS = 2;
 
-	public static final String[] COLOR_DICTIONARY = {"60s Butterfly",
-		"Anthracite",
-		"Aqua Blue",
-		"Assorted",
-		"Autumn Birds",
-		"Ballistic Green",
-		"Beige",
-		"Black",
-		"Black / Black",
-		"Black / Red",
-		"Black/Blue",
-		"Black/Gray",
-		"Black/Grey",
-		"Black/Pink",
-		"Black/Red",
-		"Black|Gray",
-		"Black|Pink",
-		"Blue",
-		"Brown",
-		"Butterflies 2",
-		"Caf",
-		"Cafe",
-		"Charcoal",
-		"Cherry Red",
-		"Chocolate",
-		"City Life",
-		"Clear",
-		"Cognac",
-		"Cyan, Magenta, Yellow",
-		"Dark Blue",
-		"Dark Brown",
-		"Dark Gray",
-		"Deep Red",
-		"Drop",
-		"Frog",
-		"Fuchsia",
-		"Giraffe",
-		"Gold",
-		"Grafiks",
-		"Gray",
-		"Green",
-		"Green Neon Lights",
-		"Grey",
-		"Gun Metal",
-		"Hammock",
-		"Hounds Tooth",
+	public static final String[] COLOR_DICTIONARY = {"60s butterfly",
+		"anthracite",
+		"aqua blue",
+		"assorted",
+		"autumn birds",
+		"ballistic green",
+		"beige",
+		"black",
+		"black / black",
+		"black / red",
+		"black/blue",
+		"black/gray",
+		"black/grey",
+		"black/pink",
+		"black/red",
+		"black|gray",
+		"black|pink",
+		"blue",
+		"brown",
+		"butterflies 2",
+		"caf",
+		"cafe",
+		"charcoal",
+		"cherry red",
+		"chocolate",
+		"city life",
+		"clear",
+		"cognac",
+		"dark blue",
+		"dark brown",
+		"dark gray",
+		"deep red",
+		"drop",
+		"frog",
+		"fuchsia",
+		"giraffe",
+		"gold",
+		"grafiks",
+		"gray",
+		"green",
+		"green neon lights",
+		"grey",
+		"gun metal",
+		"hammock",
+		"hounds tooth",
 		"Ice White",
 		"Indigo",
 		"Jet Black",
@@ -153,25 +152,27 @@ public class ExtractColorAndMatch extends Function {
 		if (simValue != 0.0f)
 			return simValue;
 		
-		String arg1 = args[0].toLowerCase();
-		String arg2 = args[1].toLowerCase();
-
+		String arg1 = args[0].toLowerCase().replaceAll("[^\\dA-Za-z\\s]", "");
+		//System.out.println(arg1);
+		String arg2 = args[1].toLowerCase().replaceAll("[^\\dA-Za-z\\s]", "");
+		//System.out.println(arg2);
+		
 		Set<String> colors0 = new HashSet<String>();
 		Set<String> colors1 = new HashSet<String>();
 		
 		for (String s: COLOR_DICTIONARY) {
-			if (arg1.indexOf(" " + s.toLowerCase() + " ") != -1) {
+			if (arg1.indexOf(s.toLowerCase()) != -1) {
 				colors0.add(s);
 				//System.out.println("Adding " + s + " to colors0");
 			}
-			if (arg2.indexOf(" " + s.toLowerCase() + " ") != -1) {
+			if (arg2.indexOf(s.toLowerCase()) != -1) {
 				colors1.add(s);
 				//System.out.println("Adding " + s + " to colors1");
 			}
 		}
 		
 		if (colors0.isEmpty() || colors1.isEmpty()) {
-			return 0.0f;
+			return -1.0f;
 		}
 		
 		int n = colors0.size() + colors1.size();
@@ -207,28 +208,34 @@ public class ExtractColorAndMatch extends Function {
 
 	public static void main(String[] args){
 		Function ecm = new ExtractColorAndMatch();
-		String s1 = "[\"This rooCASE sleeve features super shock absorbing "
-				+ "interior provide protection from bumps and scratches. Made "
-				+ "specifically for iPad Generations 2, 3 & 4 Product Material: "
-				+ "Neoprene Product Weight: 0.40 lbs. Laptop Compartment "
-				+ "Dimensions: 9.8\" x 7.4\" x .5\" Super bubble shock absorbing "
-				+ "foam interior provides protection from bumps and scratches "
-				+ "Water resistant neoprene sleeve case Velcro pocket for charger, "
-				+ "stylus and earbuds Color matching rubber zipper Designed for "
-				+ "naked iPad Generations 2, 3 & 4 Category: iPad Accessories\"]";
-		
-		String s2 = "[\"This rooCASE sleeve features super shock absorbing "
-				+ "interior provide protection from bumps and scratches. Made "
-				+ "specifically for iPad Generations 2 3 & 4 Product Material: "
-				+ "Neoprene Product Weight: 0.40 lbs. Laptop Compartment "
-				+ "Dimensions: 9.8\" x 7.4\" x .5\" Super bubble shock absorbing "
-				+ "foam interior provides protection from bumps and scratches "
-				+ "Water resistant neoprene sleeve case Velcro pocket for charger "
-				+ "stylus and earbuds Color matching rubber zipper Designed for "
-				+ "naked iPad Generations 2 3 & 4 Category: iPad Accessories\"]";
-		
-		String[] params = {s1, s2};
-		System.out.println(ecm.compute(params));
+		String[] s1 = {"[\"Lexmark Yellow Toner Cartridge LEX10B042Y\"]", "[\"Lexmark International Hi-Yield Print Cartridge F/C75015000 Page YldMagenta Ink\"]"};
+		String[] s2 = {"[\"TOSHIBA AMERICA CONSUMER Toner Cartridge, Black\"]", "[\"Toshiba America Consumer Toner Cartridge Black\"]"};
+		String[] s3 = {"[\"rooCASE Deluxe Carrying Bag for 11.6 Netbook, Pink\"]", "[\"rooCASE Deluxe Carrying Bag for iPad 2 10\" and 11.6\" Netbook\"]"};
+		String[] s4 = {"[\"Belkin AV20500-25 Blue Series Subwoofer Cable (25 ft; Retail Packaging)\"]", "[\"Blue Series Subwoofer Cable (15 Ft; Retail Packaging)\"]"};
+		String[] s5 = {"[\"Morning Industry Inc RF-01AQ Remote Control Electronic Deadbolt, Antique Brass\"]", "[\"Remote Control Electronic Dead Bolt (Polished Brass)\"]"};
+		String[] s6 = {null, "[\"Toshiba America Consumer Toner Cartridge Black\"]"};
+		String[] s7 = {"[\"rooCASE Deluxe Carrying Bag for 11.6 Netbook, Pink\"]", null};
+		String[] s8 = {null, null};
+		String[] s9 = {"", "[\"Toshiba America Consumer Toner Cartridge Black\"]"};
+		String[] s10 = {"[\"rooCASE Deluxe Carrying Bag for 11.6 Netbook, Pink\"]", ""};
+		String[] s11 = {"", ""};
+		String[] s12 = {"null", "[\"Toshiba America Consumer Toner Cartridge Black\"]"};
+		String[] s13 = {"[\"rooCASE Deluxe Carrying Bag for 11.6 Netbook, Pink\"]", "null"};
+		String[] s14 = {"null", "null"};
+		System.out.println("Extracted Colors Do Not Match: " + ecm.compute(s1));
+		System.out.println("Extracted Colors Match: " + ecm.compute(s2));
+		System.out.println("Extracted Color Not Found: " + ecm.compute(s3));
+		System.out.println("Extracted Colors Match: " + ecm.compute(s4));
+		System.out.println("Extracted Color Not Found: " + ecm.compute(s5));
+		System.out.println("NULL A: " + ecm.compute(s6));
+		System.out.println("NULL B: " + ecm.compute(s7));
+		System.out.println("NULL both A and B: " + ecm.compute(s8));
+		System.out.println("Empty A: " + ecm.compute(s9));
+		System.out.println("Empty B: " + ecm.compute(s10));
+		System.out.println("Empty both A and B: " + ecm.compute(s11));
+		System.out.println("Null string A: " + ecm.compute(s12));
+		System.out.println("Null string B: " + ecm.compute(s13));
+		System.out.println("Null string both A and B: " + ecm.compute(s14));
 	}
 
 	@Override

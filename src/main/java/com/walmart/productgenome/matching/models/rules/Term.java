@@ -55,7 +55,7 @@ public class Term {
 			return MatchStatus.DECLINE_TO_PREDICT;
 		}
 		else{	
-			switch(relop){
+			switch(relop) {
 			case LESS_THAN:
 				if(lvalue < rvalue){
 					return MatchStatus.MATCH;
@@ -78,6 +78,11 @@ public class Term {
 				break;
 			case EQUALS:
 				if(lvalue == rvalue){
+					return MatchStatus.MATCH;
+				}
+				break;
+			case NOT_EQUALS:
+				if(lvalue != rvalue){
 					return MatchStatus.MATCH;
 				}
 				break;
@@ -119,6 +124,11 @@ public class Term {
 				break;
 			case EQUALS:
 				if(lvalue == rvalue){
+					return MatchStatus.MATCH;
+				}
+				break;
+			case NOT_EQUALS:
+				if(lvalue != rvalue){
 					return MatchStatus.MATCH;
 				}
 				break;

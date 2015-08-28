@@ -11,7 +11,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.SmithWaterman;
 
 public class SmithWatermanSimilarityFunction extends Function {
 	
-	public static final String NAME = "SMITH_WATERMAN_SIMILARITY";
+	public static final String NAME = "SMITH_WATERMAN";
 	public static final String DESCRIPTION = "Smith Waterman similarity";
 	public static final int NUM_ARGS = 2;
 	

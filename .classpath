@@ -27,6 +27,5 @@
 	<classpathentry kind="lib" path="/Users/sdas7/git/Matching/lib/secondstring-20120620.jar"/>
 	<classpathentry kind="lib" path="/Users/sdas7/git/Matching/lib/simmetrics_jar_v1_6_2_d07_02_07.jar"/>
 	<classpathentry kind="lib" path="/Users/sdas7/git/Matching/lib/Weka-customized.jar"/>
-	<classpathentry kind="lib" path="/Users/sdas7/git/Matching/lib/weka-src.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

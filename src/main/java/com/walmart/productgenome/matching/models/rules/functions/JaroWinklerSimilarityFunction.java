@@ -11,7 +11,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.JaroWinkler;
 
 public class JaroWinklerSimilarityFunction extends Function {
 	
-	public static final String NAME = "JARO_WINKLER_SIMILARITY";
+	public static final String NAME = "JARO_WINKLER";
 	public static final String DESCRIPTION = "Jaro Winkler similarity";
 	public static final int NUM_ARGS = 2;
 	

@@ -22,6 +22,10 @@ public class ItemPairAudit {
   private List<RuleAudit> ruleAuditValues;
   private List<String> matchingRuleNames;
 
+  // Class probabilities - Match or Non-Match
+  private double[] classProbabilities;
+  private double votingEntropy;
+  
   public ItemPairAudit(Tuple itemPair)
   {
     this.itemPair = itemPair;
@@ -59,6 +63,22 @@ public class ItemPairAudit {
     return matchingRuleNames;
   }
 
+  public double[] getClassProbabilities() {
+	  return classProbabilities;
+  }
+  
+  public void setClassProbabilities(double[] classProbabilities) {
+	  this.classProbabilities = classProbabilities;
+  }
+  
+  public double getVotingEntropy() {
+	  return votingEntropy;
+  }
+  
+  public void setVotingEntropy(double votingEntropy) {
+	  this.votingEntropy = votingEntropy;
+  }
+  
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

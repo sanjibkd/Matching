@@ -11,7 +11,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.Jaro;
 
 public class JaroSimilarityFunction extends Function {
 
-	public static final String NAME = "JARO_SIMILARITY";
+	public static final String NAME = "JARO";
 	public static final String DESCRIPTION = "Jaro similarity";
 	public static final int NUM_ARGS = 2;
 	

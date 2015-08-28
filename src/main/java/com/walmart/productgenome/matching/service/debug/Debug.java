@@ -1,6 +1,7 @@
 package com.walmart.productgenome.matching.service.debug;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.walmart.productgenome.matching.models.audit.ItemPairAudit;
@@ -23,6 +24,10 @@ public class Debug {
       }
       
      // System.out.println("[Debug] ItemPairAudit: " + itemPairAudit);
+      List<String> matchingRuleNames = itemPairAudit.getMatchingRuleNames();
+      if (null == matchingRuleNames) {
+    	  continue;
+      }
       for (String ruleName: itemPairAudit.getMatchingRuleNames()) {
         if (totalMatchesByRule.containsKey(ruleName)) {
           totalMatchesByRule.put(ruleName, totalMatchesByRule.get(ruleName) + 1);

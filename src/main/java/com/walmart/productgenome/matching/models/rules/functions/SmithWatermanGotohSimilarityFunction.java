@@ -12,7 +12,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.SmithWatermanGotoh;
 
 public class SmithWatermanGotohSimilarityFunction extends Function {
 
-	public static final String NAME = "SMITH_WATERMAN_GOTOH_SIMILARITY";
+	public static final String NAME = "SMITH_WATERMAN_GOTOH";
 	public static final String DESCRIPTION = "Smith Waterman Gotoh similarity";
 	public static final int NUM_ARGS = 2;
 	
