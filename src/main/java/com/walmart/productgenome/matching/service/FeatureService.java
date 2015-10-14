@@ -130,6 +130,17 @@ public class FeatureService {
 		featureName += "_" + functionName;
 		return featureName;
 	}
+	
+	private static String getLongFeatureName(
+			String  attribute1Name, String attribute2Name, String functionName) {
+		String featureName = attribute1Name;
+		if (!attribute1Name.equals(attribute2Name)) {
+			featureName += "_" + attribute2Name;
+		}
+		featureName += "_" + functionName;
+		return featureName;
+	}
+	
 	public static List<Feature> recommendFeatures(Project project, Table table1,
 			Table table2, List<AttributePair> attributePairs) {
 		List<Feature> recommendedFeatures = new ArrayList<Feature>();
@@ -167,7 +178,7 @@ public class FeatureService {
 						"_" + attribute1.getName() + "_" +
 						attribute2.getName() + "_" + function.getName();
 				*/
-				String featureName = getFeatureName(attribute1.getName(),
+				String featureName = getLongFeatureName(attribute1.getName(),
 						attribute2.getName(), function.getName());
 				Feature feature = new Feature(featureName, function,
 						project.getName(), attribute1, attribute2);
