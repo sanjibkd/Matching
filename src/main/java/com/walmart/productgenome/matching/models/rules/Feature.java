@@ -3,6 +3,7 @@ package com.walmart.productgenome.matching.models.rules;
 import com.walmart.productgenome.matching.models.data.Attribute;
 import com.walmart.productgenome.matching.models.data.Tuple;
 import com.walmart.productgenome.matching.models.rules.functions.Function;
+import com.walmart.productgenome.matching.models.rules.functions.Module;
 import com.google.common.base.Objects;
 
 public class Feature {
@@ -73,6 +74,10 @@ public class Feature {
 		String[] args = new String[2];
 		args[0] = s1;
 		args[1] = s2;
+		if (function instanceof Module) {
+			Module m = (Module) function;
+			return m.compute(tuple1, tuple2);
+		}		
 		return (Float) function.compute(args);
 	}
 	

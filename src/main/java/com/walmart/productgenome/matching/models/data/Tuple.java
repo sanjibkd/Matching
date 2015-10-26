@@ -59,6 +59,10 @@ public class Tuple {
 		return sb.toString();
 	}
 	
+	public Map<Attribute, Object> getData() {
+		return this.data;
+	}
+	
 	public static void main(String[] args){
 		Map<Integer,String> map = new LinkedHashMap<Integer,String>();
 		map.put(1, "Sanjib");

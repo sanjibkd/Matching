@@ -66,7 +66,9 @@ public class Jaccard extends Function{
 	
 	public static void main(String[] args){
 		Function jac = new Jaccard();
-		System.out.println(jac.getSignature());
+		String[] args1 = {"A unique string a", "A string that has no duplicates"};
+		System.out.println(jac.compute(args1));
+		
 	}
 
 	@Override
