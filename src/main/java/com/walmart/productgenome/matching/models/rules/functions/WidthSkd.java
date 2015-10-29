@@ -135,39 +135,51 @@ public class WidthSkd extends Function implements Module {
 	
 	public float compute(Tuple tuple1, Tuple tuple2) {
 		Attribute attribute = new Attribute("WIDTH_X", Attribute.Type.FLOAT);
+		Attribute attribute1 = new Attribute("LENGTH_X", Attribute.Type.FLOAT);
+		Attribute attribute2 = new Attribute("HEIGHT_X", Attribute.Type.FLOAT);
 		Attribute productNameAttribute = new Attribute("Product_Name", Attribute.Type.TEXT);
 		Attribute psdAttribute = new Attribute("Product_Short_Description", Attribute.Type.TEXT);
 		Attribute pldAttribute = new Attribute("Product_Long_Description", Attribute.Type.TEXT);
 		Float val1 = (Float) tuple1.getAttributeValue(attribute);
 		Float val2 = (Float) tuple2.getAttributeValue(attribute);
-		String s1 = "";
+		String w1 = "";
 		if (null != val1) {
-			s1 = String.valueOf(val1);
+			w1 = String.valueOf(val1);
 		}
-		String s2 = "";
+		String w2 = "";
 		if (null != val2) {
-			s2 = String.valueOf(val2);
+			w2 = String.valueOf(val2);
+		}
+		Float lval2 = (Float) tuple2.getAttributeValue(attribute1);
+		String l2 = "";
+		if (null != lval2) {
+			l2 = String.valueOf(lval2);
+		}
+		Float hval2 = (Float) tuple2.getAttributeValue(attribute2);
+		String h2 = "";
+		if (null != hval2) {
+			h2 = String.valueOf(hval2);
 		}
 		String[] otherAttributeValues1 = {(String) tuple1.getAttributeValue(productNameAttribute),
 				(String) tuple1.getAttributeValue(psdAttribute), (String) tuple1.getAttributeValue(pldAttribute)};
 		String[] otherAttributeValues2 = {(String) tuple2.getAttributeValue(productNameAttribute),
 				(String) tuple2.getAttributeValue(pldAttribute)};
-		return computeValue(s1, s2, otherAttributeValues1, otherAttributeValues2);
+		return computeValue(w1, w2, l2, h2, otherAttributeValues1, otherAttributeValues2);
 	}
 	
-	public float computeValue(String val1, String val2,
+	public float computeValue(String w1, String w2, String l2, String h2,
 			String[] otherAttributeValues1, String[] otherAttributeValues2) {
-		if (val1 != null
-				&& !val1.toLowerCase().equals("null")
-				&& !val1.isEmpty()
-				&& val2 != null
-				&& !val2.toLowerCase().equals("null")
-				&& !val2.isEmpty()) {
-			val1 = val1.trim();
-			val2 = val2.trim();
+		if (w1 != null
+				&& !w1.toLowerCase().equals("null")
+				&& !w1.isEmpty()
+				&& w2 != null
+				&& !w2.toLowerCase().equals("null")
+				&& !w2.isEmpty()) {
+			w1 = w1.trim();
+			w2 = w2.trim();
 			try {
-				Float f1 = Float.parseFloat(val1);
-				Float f2 = Float.parseFloat(val2);
+				Float f1 = Float.parseFloat(w1);
+				Float f2 = Float.parseFloat(w2);
 				//System.out.println("f1: " + f1 + ",  f2: " + f2);
 				if (Float.compare(f1, f2) == 0) {
 					return 1.0f;
@@ -182,25 +194,75 @@ public class WidthSkd extends Function implements Module {
 			}
 		}
 
-		if (val1 != null
-				&& !val1.toLowerCase().equals("null")
-				&& !val1.isEmpty()) {
+		if (w1 != null
+				&& !w1.toLowerCase().equals("null")
+				&& !w1.isEmpty()
+				&& l2 != null
+				&& !l2.toLowerCase().equals("null")
+				&& !l2.isEmpty()) {
+			w1 = w1.trim();
+			l2 = l2.trim();
+			try {
+				Float f1 = Float.parseFloat(w1);
+				Float f2 = Float.parseFloat(l2);
+				//System.out.println("f1: " + f1 + ",  f2: " + f2);
+				if (Float.compare(f1, f2) == 0) {
+					return 1.0f;
+				}
+//				else {
+//					return 0.0f;
+//				}
+			}
+			catch (NumberFormatException e) {
+				//System.out.println("Number format exception");
+				//return 0.0f;
+			}
+		}
+		
+		if (w1 != null
+				&& !w1.toLowerCase().equals("null")
+				&& !w1.isEmpty()
+				&& h2 != null
+				&& !h2.toLowerCase().equals("null")
+				&& !h2.isEmpty()) {
+			w1 = w1.trim();
+			h2 = h2.trim();
+			try {
+				Float f1 = Float.parseFloat(w1);
+				Float f2 = Float.parseFloat(h2);
+				//System.out.println("f1: " + f1 + ",  f2: " + f2);
+				if (Float.compare(f1, f2) == 0) {
+					return 1.0f;
+				}
+//				else {
+//					return 0.0f;
+//				}
+			}
+			catch (NumberFormatException e) {
+				//System.out.println("Number format exception");
+				//return 0.0f;
+			}
+		}
+		
+		if (w1 != null
+				&& !w1.toLowerCase().equals("null")
+				&& !w1.isEmpty()) {
 			// val2 does not exist, probe val1 into other attributes 2
 			// System.out.println("Color 2 does not exist, color1 found in text of 2");
 			for (String s: otherAttributeValues2) {
-				if (s.toLowerCase().contains(val1.toLowerCase())) {
+				if (s.toLowerCase().contains(w1.toLowerCase())) {
 					return 1.0f;
 				}
 			}
 			//return 0.0f;
 		}
 
-		if (val2 != null
-				&& !val2.toLowerCase().equals("null")
-				&& !val2.isEmpty()) {
+		if (w2 != null
+				&& !w2.toLowerCase().equals("null")
+				&& !w2.isEmpty()) {
 			// color1 does not exist, probe color2 into other attributes 1
 			for (String s: otherAttributeValues1) {
-				if (s.toLowerCase().contains(val2.toLowerCase())) {
+				if (s.toLowerCase().contains(w2.toLowerCase())) {
 					return 1.0f;
 				}
 			}
