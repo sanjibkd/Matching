@@ -45,6 +45,25 @@ public class TableService {
 		return trainTestTables;
 	}
 
+	public static Table[] splitTable(Table table,
+			String split1Name, String split2Name, double splitRatio) {
+		Table[] splitTables = new Table[2];
+		List<Object> ids1 = new ArrayList<Object>();
+		List<Object> ids2 = new ArrayList<Object>();
+		Random random = new Random();
+		for (Object id : table.getAllIdsInOrder()) {
+			if (random.nextDouble() < splitRatio) {
+				ids1.add(id);
+			}
+			else {
+				ids2.add(id);
+			}
+		}
+		splitTables[0] = new Table(table, split1Name, ids1);
+		splitTables[1] = new Table(table, split2Name, ids2);
+		return splitTables;
+	}
+	
 	public static Table importFromJson(String projectName,
 			String tableName, String jsonFilePath) throws IOException {
 		return JsonLoader.loadTableFromJson(projectName,
