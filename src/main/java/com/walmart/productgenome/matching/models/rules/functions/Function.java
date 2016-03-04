@@ -2,6 +2,8 @@ package com.walmart.productgenome.matching.models.rules.functions;
 
 import java.util.Set;
 
+import org.jsoup.Jsoup;
+
 import com.google.common.base.Objects;
 import com.walmart.productgenome.matching.models.data.Attribute.AllTypes;
 
@@ -49,6 +51,24 @@ public abstract class Function {
 		return 0.0f;
 	}
 
+	public String removeNonAsciiCharacters(String s) {
+		return s.replaceAll("[^\\x00-\\x7F]", "");
+	}
+	
+	public String html2Text(String html) {
+		return Jsoup.parse(html).text();
+	}
+	
+	public String removeEnclosingBrackets(String s) {
+		String prefix = "[\"";
+		String suffix = "\"]";
+		int l = s.length();
+		if (s.startsWith(prefix) && s.endsWith(suffix)) {
+			return s.substring(2, l - 2);
+		}
+		return s;
+	}
+	
 	public abstract Set<AllTypes> getAllRecommendedTypes();
 
 	public abstract Object compute(String[] args) throws IllegalArgumentException;

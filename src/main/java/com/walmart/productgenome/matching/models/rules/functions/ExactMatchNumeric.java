@@ -29,10 +29,8 @@ public class ExactMatchNumeric extends Function {
 		if (simValue != 0.0f)
 			return simValue;
 		
-		int l1 = args[0].length();
-		int l2 = args[1].length();
-		String arg1 = args[0].substring(2, l1 - 2); // [".."]
-		String arg2 = args[1].substring(2, l2 - 2); // [".."]		
+		String arg1 = removeEnclosingBrackets(args[0].toLowerCase());
+		String arg2 = removeEnclosingBrackets(args[1].toLowerCase());
 		//System.out.println("arg1: " + arg1 + ", arg2: " + arg2);
 		try {
 			double d1 = Double.parseDouble(arg1);
@@ -45,7 +43,10 @@ public class ExactMatchNumeric extends Function {
 			}
 		}
 		catch (NumberFormatException e) {
-			return -1.0f;
+			if (arg1.equalsIgnoreCase(arg2)) {
+				return 1.0f;
+			}
+			return 0.0f;
 		}
 	}
 

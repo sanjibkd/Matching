@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.walmart.productgenome.matching.daos.TableDao;
+import com.walmart.productgenome.matching.evaluate.EvaluationSummary;
+import com.walmart.productgenome.matching.evaluate.EvaluationSummary.IdPair;
 import com.walmart.productgenome.matching.models.data.Attribute;
 import com.walmart.productgenome.matching.models.data.Table;
 import com.walmart.productgenome.matching.models.data.Tuple;
@@ -76,5 +79,74 @@ public class ToolsService {
 		}
 		bw.close();
 		return n;
+	}
+	
+	public static Table removePairs(String projectName, Table inputPairsTable,
+			String outputPairsTableName, Set<IdPair> idPairs) {
+		List<Object> pairIds = new ArrayList<Object>();
+		List<Attribute> attributes = inputPairsTable.getAttributes();
+		Attribute pairId = inputPairsTable.getIdAttribute();
+		Attribute id1 = attributes.get(1);
+		Attribute id2 = attributes.get(2);
+		for (Tuple pair: inputPairsTable.getAllTuplesInOrder()) {
+			Object id = pair.getAttributeValue(pairId);
+			Object id1Val = pair.getAttributeValue(id1);
+			Object id2Val = pair.getAttributeValue(id2);
+			if (!idPairs.contains(new IdPair(id1Val, id2Val))) {
+				pairIds.add(id);
+			}
+		}
+		Table outputPairsTable = new Table(inputPairsTable, outputPairsTableName,
+				pairIds);
+		return outputPairsTable;
+	}
+	
+	public static Table changeLabels(String projectName, Table inputPairsTable,
+			String outputPairsTableName, Set<IdPair> idPairs) {
+		Table outputPairsTable = new Table(inputPairsTable, outputPairsTableName);
+		List<Object> pairIds = new ArrayList<Object>();
+		List<Attribute> attributes = outputPairsTable.getAttributes();
+		Attribute pairId = outputPairsTable.getIdAttribute();
+		Attribute id1 = attributes.get(1);
+		Attribute id2 = attributes.get(2);
+		Attribute label = attributes.get(attributes.size() - 1);
+		for (Tuple pair: outputPairsTable.getAllTuplesInOrder()) {
+			Object id = pair.getAttributeValue(pairId);
+			Object id1Val = pair.getAttributeValue(id1);
+			Object id2Val = pair.getAttributeValue(id2);
+			if (idPairs.contains(new IdPair(id1Val, id2Val))) {
+				pairIds.add(id);
+				int labelVal = (Integer) pair.getAttributeValue(label);
+				labelVal = labelVal == 0 ? 1 : 0;
+				pair.setAttributeValue(label, labelVal);
+			}
+		}
+		return outputPairsTable;
+	}
+	
+	public static long cleanLabeledPairs(String projectName, Table inputLabeledPairsTable,
+			String outputLabeledPairsName, EvaluationSummary evalSummary,
+			String errorType, String actionType) {
+		Set<IdPair> idPairs;
+		if (errorType.equals("0")) {
+			// precision errors
+			idPairs = evalSummary.getFalsePositives();
+		}
+		else {
+			// recall errors
+			idPairs = evalSummary.getFalseNegatives();
+		}
+		Table outputPairsTable;
+		if (actionType.equals("0")) {
+			// remove pairs
+			outputPairsTable = removePairs(projectName, inputLabeledPairsTable,
+					outputLabeledPairsName, idPairs);
+		}
+		else {
+			// change labels
+			outputPairsTable = changeLabels(projectName, inputLabeledPairsTable,
+					outputLabeledPairsName, idPairs);
+		}
+		return outputPairsTable.getSize();
 	}
 }

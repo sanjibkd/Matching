@@ -33,8 +33,8 @@ public class Jaccard extends Function{
 		if (simValue != 0.0f)
 			return simValue;
 		
-		String arg1 = args[0].toLowerCase();
-		String arg2 = args[1].toLowerCase();
+		String arg1 = removeNonAsciiCharacters(args[0].toLowerCase());
+		String arg2 = removeNonAsciiCharacters(args[1].toLowerCase());
 		
 		AbstractStringMetric metric = new JaccardSimilarity();
 		return metric.getSimilarity(arg1, arg2);

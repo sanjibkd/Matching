@@ -190,16 +190,78 @@ public class MatchingDao {
 		Instances trainInstances = WekaUtils.applyFilterToInstances(instances);
 		trainInstances = WekaUtils.setClassIndex(trainInstances);
 		classifier.buildClassifier(trainInstances);
+		/*
 		if (classifier instanceof EMSRandomForest) {
 			EMSRandomForest rf = (EMSRandomForest) classifier;
 			List<List<String>> rfRules = rf.getRandomForestRules();
 			saveRules(rfRules);
 		}
+		 */
 		return getMatches(projectName, pairsTable, testFeaturesTable, table1,
 				table2, classifier, matchesName, itemPairAudits,
 				table1AttributeNames, table2AttributeNames);
 	}
 
+	// MatchWithAudit
+	public static Table match(String projectName, Table pairsTable,
+			Table testFeaturesTable, Table table1, Table table2,
+			String modelName, Table trainFeaturesTable, String matchesName, 
+			Map<Tuple, ItemPairAudit> itemPairAudits,
+			String[] table1AttributeNames, String[] table2AttributeNames,
+			double matchingThreshold) throws Exception {
+		AbstractClassifier classifier = null;
+		if	("RF".equals(modelName)) {
+			EMSRandomForest rf = new EMSRandomForest();
+			rf.setNumExecutionSlots(8);
+			classifier = rf;
+		}
+		else if ("J48".equals(modelName)) {
+			classifier = new J48();
+		}
+		else if ("SMO".equals(modelName)) {
+			classifier = new SMO();
+		}
+		else if ("NB".equals(modelName)) {
+			classifier = new NaiveBayes();
+		}
+		else if ("IBK".equals(modelName)) {
+			classifier = new IBk();
+		}
+		else if ("ABM1".equals(modelName)) {
+			classifier = new AdaBoostM1();
+		}
+		else if ("STACKING".equals(modelName)) {
+			classifier = new Stacking();
+		}
+		else if ("LB".equals(modelName)) {
+			classifier = new LogitBoost();
+		}
+		else if ("GBRT".equals(modelName)) {
+			LogitBoost lb = new LogitBoost();
+			REPTree rep = new REPTree();
+			rep.setMaxDepth(6);
+			lb.setClassifier(rep);
+			lb.setNumIterations(50);
+			lb.setShrinkage(0.1);
+			classifier = lb;
+		}
+		Instances instances = WekaUtils.getInstancesFromTable(trainFeaturesTable, true, false);
+		Instances trainInstances = WekaUtils.applyFilterToInstances(instances);
+		trainInstances = WekaUtils.setClassIndex(trainInstances);
+		classifier.buildClassifier(trainInstances);
+		/*
+			if (classifier instanceof EMSRandomForest) {
+				EMSRandomForest rf = (EMSRandomForest) classifier;
+				List<List<String>> rfRules = rf.getRandomForestRules();
+				saveRules(rfRules);
+			}
+		 */
+		return getMatches(projectName, pairsTable, testFeaturesTable, table1,
+				table2, classifier, matchesName, itemPairAudits,
+				table1AttributeNames, table2AttributeNames, matchingThreshold);
+	}
+
+	/*
 	private static void saveRules(List<List<String>> rfRules) throws FileNotFoundException {
 		long timestamp = System.currentTimeMillis();
 		File file = new File ("/Users/sdas7/Documents/RFrules" + timestamp + ".txt");
@@ -218,7 +280,7 @@ public class MatchingDao {
 		}
 		pw.close();
 	}
-	
+	 */
 	public static void addMatchingSummary(String projectName,
 			MatchingSummary matchingSummary) throws IOException {
 		Project project = ProjectDao.open(projectName);
@@ -371,6 +433,33 @@ public class MatchingDao {
 		matches.addAllTuples(matchedPairs);
 		return matches;
 	}
+
+	private static Table getMatches(String projectName, Table pairsTable,
+			Table featuresTable, Table table1, Table table2,
+			AbstractClassifier classifier, String matchesName, 
+			Map<Tuple, ItemPairAudit> itemPairAudits,
+			String[] table1AttributeNames, String[] table2AttributeNames,
+			double matchingThreshold) throws Exception {
+
+		List<Attribute> matchesAttributes = new ArrayList<Attribute>();
+		List<Attribute> table1Attributes = new ArrayList<Attribute>();
+		List<Attribute> table2Attributes = new ArrayList<Attribute>();
+
+		Table matches = createMatchesTable(projectName, pairsTable,
+				table1, table2, matchesName, matchesAttributes, table1AttributeNames,
+				table2AttributeNames,
+				table1Attributes, table2Attributes);
+
+
+		List<Tuple> matchedPairs = getMatchedPairs(pairsTable, featuresTable,
+				table1, table2,
+				classifier, matchesAttributes, table1Attributes, table2Attributes,
+				itemPairAudits, matchingThreshold);
+
+		//System.out.println("No. of matched pairs: " + matchedPairs.size());
+		matches.addAllTuples(matchedPairs);
+		return matches;
+	}
 	
 	private static List<Tuple> getMatchedPairs(Table candset, Table table1,
 			Table table2, Matcher matcher, List<Attribute> matchesAttributes,
@@ -423,11 +512,11 @@ public class MatchingDao {
 			Table table2, AbstractClassifier classifier, List<Attribute> matchesAttributes,
 			List<Attribute> table1Attributes, List<Attribute> table2Attributes,
 			Map<Tuple, ItemPairAudit> itemPairAudits) throws Exception {
-		
+
 		Instances instances = WekaUtils.getInstancesFromTable(featuresTable, true, false);
 		Instances testInstances = WekaUtils.applyFilterToInstances(instances);
 		testInstances = WekaUtils.setClassIndex(testInstances);
-		
+
 		List<Tuple> matchedPairs = new ArrayList<Tuple>();
 		int index = 0;
 		for (Tuple t : pairsTable.getAllTuplesInOrder()) {
@@ -441,6 +530,30 @@ public class MatchingDao {
 		return matchedPairs;
 	}
 	
+	private static List<Tuple> getMatchedPairs(Table pairsTable, 
+			Table featuresTable, Table table1,
+			Table table2, AbstractClassifier classifier, List<Attribute> matchesAttributes,
+			List<Attribute> table1Attributes, List<Attribute> table2Attributes,
+			Map<Tuple, ItemPairAudit> itemPairAudits,
+			double matchingThreshold) throws Exception {
+
+		Instances instances = WekaUtils.getInstancesFromTable(featuresTable, true, false);
+		Instances testInstances = WekaUtils.applyFilterToInstances(instances);
+		testInstances = WekaUtils.setClassIndex(testInstances);
+
+		List<Tuple> matchedPairs = new ArrayList<Tuple>();
+		int index = 0;
+		for (Tuple t : pairsTable.getAllTuplesInOrder()) {
+			ItemPairAudit itemPairAudit = new ItemPairAudit(t);
+			Instance testInstance = testInstances.get(index++);
+			addMatchedPair(t, testInstance, table1, table2, classifier,
+					matchesAttributes, matchedPairs, table1Attributes,
+					table2Attributes, itemPairAudit, matchingThreshold);
+			itemPairAudits.put(t, itemPairAudit);
+		}
+		return matchedPairs;
+	}
+
 	private static Map<Attribute, Object> getMatchedPairData(List<Attribute> matchesAttributes,
 			Tuple candsetTuple, Tuple tuple1, Tuple tuple2,
 			List<Attribute> table1Attributes, List<Attribute> table2Attributes) {
@@ -575,7 +688,7 @@ public class MatchingDao {
 		//System.out.println("MatchingDao (pairId, MatchStatus): (" + pairId + ", " + result + ")");
 		return result;
 	}
-	
+
 	private static void addMatchedPair(Tuple candsetTuple,
 			Instance testInstance, Table table1,
 			Table table2, AbstractClassifier classifier, List<Attribute> matchesAttributes,
@@ -611,18 +724,78 @@ public class MatchingDao {
 			EMSRandomForest rf = (EMSRandomForest) classifier;
 			votingEntropy = rf.getVotingEntropyForInstance(testInstance);
 		}
-//		if (("12179498".equals(id1) && "12179498#eBags".equals(id2))
-//				|| ("11962150".equals(id1) && "11962150#ivgStores".equals(id2))
-//				|| ("26989456".equals(id1) && "26989456#eBags".equals(id2))
-//				|| ("21984488".equals(id1) && "21984488#eBags".equals(id2))) {
-//			System.out.println("id1: " + id1 + ", id2: " + id2
-//					+ ", classIndex: " + classIndex + ", prob0: "
-//					+ classProbabilities[0] + ", prob1: " + classProbabilities[1]
-//					+ ", entropy: " + votingEntropy);
-//		}
-//		
+		//		if (("12179498".equals(id1) && "12179498#eBags".equals(id2))
+		//				|| ("11962150".equals(id1) && "11962150#ivgStores".equals(id2))
+		//				|| ("26989456".equals(id1) && "26989456#eBags".equals(id2))
+		//				|| ("21984488".equals(id1) && "21984488#eBags".equals(id2))) {
+		//			System.out.println("id1: " + id1 + ", id2: " + id2
+		//					+ ", classIndex: " + classIndex + ", prob0: "
+		//					+ classProbabilities[0] + ", prob1: " + classProbabilities[1]
+		//					+ ", entropy: " + votingEntropy);
+		//		}
+		//		
 		MatchStatus result = MatchStatus.NON_MATCH;
 		if (classIndex == 0) {
+			// MATCH
+			result = MatchStatus.MATCH;
+		}
+		Attribute labelAttribute = matchesAttributes.get(matchesAttributes.size()-1);
+		data.put(labelAttribute, result.getLabel());
+		matchedPairs.add(new Tuple(data));
+		//System.out.println("MatchingDao (pairId, MatchStatus): (" + pairId + ", " + result + ")");
+		itemPairAudit.setVotingEntropy(votingEntropy);
+		itemPairAudit.setClassProbabilities(classProbabilities);
+		itemPairAudit.setStatus(result);
+	}
+	
+	private static void addMatchedPair(Tuple candsetTuple,
+			Instance testInstance, Table table1,
+			Table table2, AbstractClassifier classifier, List<Attribute> matchesAttributes,
+			List<Tuple> matchedPairs, List<Attribute> table1Attributes,
+			List<Attribute> table2Attributes, ItemPairAudit itemPairAudit,
+			double matchingThreshold) throws Exception {
+
+		Attribute idAttribute1 = matchesAttributes.get(1);
+		Attribute idAttribute2 = matchesAttributes.get(2);
+		Object id1 = candsetTuple.getAttributeValue(idAttribute1);
+		Object id2 = candsetTuple.getAttributeValue(idAttribute2);
+
+		Tuple tuple1 = table1.getTuple(id1);
+		if (null == tuple1) {
+			throw new IOException("Cannot retrieve tuple from table 1. Tuple id: " + id1);
+		}
+
+		Tuple tuple2 = table2.getTuple(id2);
+		if (null == tuple2) {
+			throw new IOException("Cannot retrieve tuple from table 2. Tuple id: " + id2);
+		}
+
+		Map<Attribute, Object> data = getMatchedPairData(matchesAttributes,
+				candsetTuple, tuple1, tuple2, table1Attributes, table2Attributes);
+
+		data.put(idAttribute1, id1);
+		data.put(idAttribute2, id2);
+
+		//System.out.println("[MatchingDao] Evaluating tuple1: " + tuple1 + ", tuple2: " + tuple2);
+		//double classIndex = classifier.classifyInstance(testInstance);
+		double[] classProbabilities = classifier.distributionForInstance(testInstance);
+		double votingEntropy = -1.0;
+		if (classifier instanceof EMSRandomForest) {
+			EMSRandomForest rf = (EMSRandomForest) classifier;
+			votingEntropy = rf.getVotingEntropyForInstance(testInstance);
+		}
+		//		if (("12179498".equals(id1) && "12179498#eBags".equals(id2))
+		//				|| ("11962150".equals(id1) && "11962150#ivgStores".equals(id2))
+		//				|| ("26989456".equals(id1) && "26989456#eBags".equals(id2))
+		//				|| ("21984488".equals(id1) && "21984488#eBags".equals(id2))) {
+		//			System.out.println("id1: " + id1 + ", id2: " + id2
+		//					+ ", classIndex: " + classIndex + ", prob0: "
+		//					+ classProbabilities[0] + ", prob1: " + classProbabilities[1]
+		//					+ ", entropy: " + votingEntropy);
+		//		}
+		//		
+		MatchStatus result = MatchStatus.NON_MATCH;
+		if (classProbabilities[0] >= matchingThreshold) {
 			// MATCH
 			result = MatchStatus.MATCH;
 		}

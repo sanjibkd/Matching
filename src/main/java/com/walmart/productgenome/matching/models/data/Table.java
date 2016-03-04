@@ -45,6 +45,14 @@ public class Table {
 		this.projectName = otherTable.getProjectName();
 	}
 
+	public Table(Table otherTable, String tableName) {
+		this.name = tableName;
+		this.idAttrib = new Attribute(otherTable.getIdAttribute().getName(), otherTable.getIdAttribute().getType());
+		this.attributes = new ArrayList<Attribute>(otherTable.getAttributes());
+		this.tuples = new LinkedHashMap<Object, Tuple>(otherTable.tuples);
+		this.projectName = otherTable.getProjectName();
+	}
+	
 	// copy constructor for sampling
 	public Table(Table otherTable, String tableName, List<Object> ids) {
 		this.name = tableName;
