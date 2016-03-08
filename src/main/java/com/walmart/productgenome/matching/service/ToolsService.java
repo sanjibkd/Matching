@@ -124,7 +124,7 @@ public class ToolsService {
 		return outputPairsTable;
 	}
 	
-	public static long cleanLabeledPairs(String projectName, Table inputLabeledPairsTable,
+	public static Table cleanLabeledPairs(String projectName, Table inputLabeledPairsTable,
 			String outputLabeledPairsName, EvaluationSummary evalSummary,
 			String errorType, String actionType) {
 		Set<IdPair> idPairs;
@@ -147,6 +147,6 @@ public class ToolsService {
 			outputPairsTable = changeLabels(projectName, inputLabeledPairsTable,
 					outputLabeledPairsName, idPairs);
 		}
-		return outputPairsTable.getSize();
+		return outputPairsTable;
 	}
 }
