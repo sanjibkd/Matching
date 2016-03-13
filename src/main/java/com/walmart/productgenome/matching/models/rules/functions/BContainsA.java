@@ -41,15 +41,22 @@ public class BContainsA extends Function {
 		float simValue = handleMissingValue(args[0], args[1]);
 		if (simValue != 0.0f)
 			return simValue;
-
-		String arg1 = args[0].replaceAll("[^\\w]", "").toLowerCase();
+		
+		String arg1 = args[0].replaceAll("[^a-zA-Z0-9 ]", "").toLowerCase();
 		//System.out.println("arg1: " + arg1);
+		if (arg1.equals("other") || arg1.equals("multicolor") || arg1.equals("multi color")) {
+			return -1.0f;
+		}
+		
+		if (args[1].toLowerCase().contains(arg1)) {
+			return 1.0f;
+		}
 		
 		String[] arg2Vals = args[1].split("\\s");
 
 		Set<String> arg2Words = new HashSet<String>();
 		for (String s: arg2Vals) {
-			s = s.replaceAll("[^\\w]", "").toLowerCase();
+			s = s.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 			//System.out.println(s);
 			arg2Words.add(s);
 		}
@@ -97,8 +104,14 @@ public class BContainsA extends Function {
 		String[] s12 = {"null", "[\"UBN233-10\"]"};
 		String[] s13 = {"[\"UBN23310\"]", "null"};
 		String[] s14 = {"null", "null"};
+		String[] s15 = {"PLCM24IR", "Pyle UNVSL MNT REAR CAM PYLPLCM24IR"};
+		String[] s16 = {"T9FKK", "Dell 331-7377 EHY Black Ink DLLT9FKK"};
+		String[] s17 = {"KSBTA100", "NEW JVC KS-BTA100 BLUETOOTH HANDS-FREE"};
+		String[] s18 = {"U042-036", "Tripp Lite 36FT HI-SPEED USB CABLE TRPU042036"};
+		String[] s19 = {"DURDLCR2BPK", "Duracell Ultra CR2 Photo Battery"};
+		String[] s20 = {"PMC10_1284", "StarTech PMC101284 10 Feet"};
 		System.out.println("B contains A: " + nmmpn.compute(s1));
-		System.out.println("B contains A:" + nmmpn.compute(s2));
+		System.out.println("B contains A: " + nmmpn.compute(s2));
 		System.out.println("B contains A: " + nmmpn.compute(s3));
 		System.out.println("B contains A: " + nmmpn.compute(s4));
 		System.out.println("B contains A: " + nmmpn.compute(s5));
@@ -111,6 +124,12 @@ public class BContainsA extends Function {
 		System.out.println("Null string A: " + nmmpn.compute(s12));
 		System.out.println("Null string B: " + nmmpn.compute(s13));
 		System.out.println("Null string both A and B: " + nmmpn.compute(s14));
+		System.out.println("B contains A: " + nmmpn.compute(s15));
+		System.out.println("B contains A: " + nmmpn.compute(s16));
+		System.out.println("B contains A: " + nmmpn.compute(s17));
+		System.out.println("B contains A: " + nmmpn.compute(s18));
+		System.out.println("B contains A: " + nmmpn.compute(s19));
+		System.out.println("B contains A: " + nmmpn.compute(s20));
 	}	
 
 }

@@ -77,6 +77,8 @@ public class ExactMatch extends Function {
 	public static void main(String[] args) {
 		ExactMatch em = new ExactMatch();
 		String[] args1 = {"14.5", "14.5"};
+		String[] args2 = {"YURBUDS", "StarTech"};
 		System.out.println(em.compute(args1));
+		System.out.println(em.compute(args2));
 	}
 }
